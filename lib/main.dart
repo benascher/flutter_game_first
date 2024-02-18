@@ -35,12 +35,21 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
   final double obstacleHeight = 100.0;
   final double obstacleMass = 10000.0; // mass of the obstacle
 
+
+  // Second obstacle position and size
+  final double obstacle2Top = 300.0;
+  final double obstacle2Left = 200.0;
+  final double obstacle2Width = 100.0;
+  final double obstacle2Height = 100.0;
+
   // Air resistance
   final double airResistance = 0.01;
 
   int score = 0; // Add a score variable
 
   List<Bullet> bullets = [];
+
+  int currentWorld = 1;
 
   // AudioCache audioCache = AudioCache(); // Add this line
 
@@ -75,11 +84,11 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         // Bounce when hitting the edge of the screen
         if (left < 0) {
           left = 0;
-          velocityX = velocityX.abs();
-        } else if (left + characterWidth > MediaQuery.of(context).size.width) {
-          left = MediaQuery.of(context).size.width - characterWidth;
-          velocityX = -velocityX.abs();
-        }
+          velocityX = velocityX.abs();}
+        // } else if (left + characterWidth > MediaQuery.of(context).size.width) {
+        //   left = MediaQuery.of(context).size.width - characterWidth;
+        //   velocityX = -velocityX.abs();
+        // }
         if (top < 0) {
           top = 0;
           velocityY = velocityY.abs();
@@ -123,6 +132,35 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
 
     // Remove bullets that are off-screen
     bullets.removeWhere((bullet) => bullet.left < 0 || bullet.left > MediaQuery.of(context).size.width);
+
+    if (left + characterWidth > MediaQuery.of(context).size.width) {
+      currentWorld++;
+      left = 0; // Reset the character's position to the left edge of the screen
+    }
+
+        // Bounce when hitting the second obstacle (only in the second world)
+    if (currentWorld == 2 &&
+        left + characterWidth > obstacle2Left && left < obstacle2Left + obstacle2Width &&
+        top + characterHeight > obstacle2Top && top < obstacle2Top + obstacle2Height) {
+      // Calculate the total momentum before the collision
+      double totalMomentumX = characterMass * velocityX + obstacleMass * 0; // assuming the obstacle is stationary
+      double totalMomentumY = characterMass * velocityY + obstacleMass * 0; // assuming the obstacle is stationary
+
+      // After the collision, the character's velocity is the total momentum divided by the character's mass
+      velocityX = totalMomentumX / characterMass;
+      velocityY = totalMomentumY / characterMass;
+
+      // Reverse the direction of the velocity to simulate a bounce
+      velocityX = -velocityX;
+      velocityY = -velocityY;
+
+      top += velocityY;
+      left += velocityX;
+
+      if (velocityX.abs() >= 0.1 || velocityY.abs() >= 0.4) {
+        score++; // Increase the score when the character hits the obstacle
+      }
+    }
 
     });
     _controller.repeat();
@@ -179,6 +217,16 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
               child: Text('Shoot'),
             ),
           ),
+          Positioned( // Add a Text widget to display the current world
+            top: 20,
+            left: 20,
+            child: Text('World: $currentWorld', style: TextStyle(fontSize: 24)),
+          ),
+                  if (currentWorld == 2) Positioned( // Add a second obstacle in the second world
+          top: obstacle2Top,
+          left: obstacle2Left,
+          child: Container(width: obstacle2Width, height: obstacle2Height, color: Colors.blue),
+        ),
           ],
         ),
       ),
