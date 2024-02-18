@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 // import 'package:audioplayers/audioplayers.dart';
 
@@ -128,58 +130,76 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
+    return GestureDetector(
+        onTapDown: (details) {
+          shoot(details.globalPosition);
+        },
+        child:Scaffold(
+          backgroundColor: Colors.white38,
+      body:  Stack(
+          children: <Widget>[
+            Positioned(
+              top: top,
+              left: left,
+              child: Draggable(
+                child: Container(width: characterWidth, height: characterHeight, color: Colors.red),
+                feedback: Container(width: characterWidth, height: characterHeight, color: Colors.red.withOpacity(0.5)),
+                onDragEnd: (details) {
+                  setState(() {
+                    // Set the initial velocities based on the drag speed
+                    velocityX = details.velocity.pixelsPerSecond.dx / 60;
+                    velocityY = details.velocity.pixelsPerSecond.dy / 60;
+                  });
+                },
+              ),
+            ),
+            Positioned(
+              top: obstacleTop,
+              left: obstacleLeft,
+              child: Container(width: obstacleWidth, height: obstacleHeight, color: Colors.blue),
+            ),
+            Positioned( // Add a Text widget to display the score
+              top: 20,
+              right: 20,
+              child: Text('Score: $score', style: TextStyle(fontSize: 24)),
+            ),
+                    // Draw the bullets
+          ...bullets.map((bullet) => Positioned(
+            top: bullet.top,
+            left: bullet.left,
+            child: Container(width: 10, height: 10, color: Colors.yellow), // adjust size and color as needed
+          )),
+        
+          // Add a button to shoot
           Positioned(
-            top: top,
-            left: left,
-            child: Draggable(
-              child: Container(width: characterWidth, height: characterHeight, color: Colors.red),
-              feedback: Container(width: characterWidth, height: characterHeight, color: Colors.red.withOpacity(0.5)),
-              onDragEnd: (details) {
-                setState(() {
-                  // Set the initial velocities based on the drag speed
-                  velocityX = details.velocity.pixelsPerSecond.dx / 60;
-                  velocityY = details.velocity.pixelsPerSecond.dy / 60;
-                });
-              },
+            bottom: 20,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: shootButton,
+              child: Text('Shoot'),
             ),
           ),
-          Positioned(
-            top: obstacleTop,
-            left: obstacleLeft,
-            child: Container(width: obstacleWidth, height: obstacleHeight, color: Colors.blue),
-          ),
-          Positioned( // Add a Text widget to display the score
-            top: 20,
-            right: 20,
-            child: Text('Score: $score', style: TextStyle(fontSize: 24)),
-          ),
-                  // Draw the bullets
-        ...bullets.map((bullet) => Positioned(
-          top: bullet.top,
-          left: bullet.left,
-          child: Container(width: 10, height: 10, color: Colors.yellow), // adjust size and color as needed
-        )),
-
-        // Add a button to shoot
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: ElevatedButton(
-            onPressed: shoot,
-            child: Text('Shoot'),
-          ),
+          ],
         ),
-        ],
       ),
     );
   }
 
-  void shoot() {
+  void shootButton() {
     setState(() {
       bullets.add(Bullet(top: top, left: left, velocityX: 5, velocityY: 0)); // adjust velocityX and velocityY as needed
+    });
+  }
+
+  void shoot(Offset tapPosition) {
+    double dx = tapPosition.dx - left;
+    double dy = tapPosition.dy - top;
+    double magnitude = sqrt(dx * dx + dy * dy);
+    double velocityX = 5 * dx / magnitude; // 5 is the speed of the bullet
+    double velocityY = 5 * dy / magnitude; // 5 is the speed of the bullet
+
+    setState(() {
+      bullets.add(Bullet(top: top, left: left, velocityX: velocityX, velocityY: velocityY));
     });
   }
 
