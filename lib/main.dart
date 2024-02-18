@@ -38,6 +38,8 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
 
   int score = 0; // Add a score variable
 
+  List<Bullet> bullets = [];
+
   // AudioCache audioCache = AudioCache(); // Add this line
 
   @override
@@ -110,6 +112,16 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
           // audioCache.play('short.mp3'); // Play the sound effect
         }
       });
+
+          // Move the bullets
+    bullets.forEach((bullet) {
+      bullet.left += bullet.velocityX;
+      bullet.top += bullet.velocityY;
+    });
+
+    // Remove bullets that are off-screen
+    bullets.removeWhere((bullet) => bullet.left < 0 || bullet.left > MediaQuery.of(context).size.width);
+
     });
     _controller.repeat();
   }
@@ -144,9 +156,31 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
             right: 20,
             child: Text('Score: $score', style: TextStyle(fontSize: 24)),
           ),
+                  // Draw the bullets
+        ...bullets.map((bullet) => Positioned(
+          top: bullet.top,
+          left: bullet.left,
+          child: Container(width: 10, height: 10, color: Colors.yellow), // adjust size and color as needed
+        )),
+
+        // Add a button to shoot
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: ElevatedButton(
+            onPressed: shoot,
+            child: Text('Shoot'),
+          ),
+        ),
         ],
       ),
     );
+  }
+
+  void shoot() {
+    setState(() {
+      bullets.add(Bullet(top: top, left: left, velocityX: 5, velocityY: 0)); // adjust velocityX and velocityY as needed
+    });
   }
 
   @override
@@ -154,4 +188,13 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
     _controller.dispose();
     super.dispose();
   }
+}
+
+class Bullet {
+  double top;
+  double left;
+  double velocityX;
+  double velocityY;
+
+  Bullet({required this.top, required this.left, required this.velocityX, required this.velocityY});
 }
