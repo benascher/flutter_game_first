@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -37,9 +38,12 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
 
   int score = 0; // Add a score variable
 
+  // AudioCache audioCache = AudioCache(); // Add this line
+
   @override
   void initState() {
     super.initState();
+    // audioCache.play('short.mp3');
     _controller = AnimationController(vsync: this, duration: Duration(seconds: 1));
     _controller.addListener(() {
       setState(() {
@@ -94,6 +98,8 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
           velocityY = -velocityY;
 
           score++; // Increase the score when the character hits the obstacle
+        
+          // audioCache.play('short.mp3'); // Play the sound effect
         }
       });
     });
