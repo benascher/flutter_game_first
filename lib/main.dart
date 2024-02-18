@@ -30,6 +30,9 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
   final double obstacleWidth = 100.0;
   final double obstacleHeight = 100.0;
 
+  // Air resistance
+  final double airResistance = 0.01;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +42,10 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         // Update velocity based on acceleration
         velocityX += accelerationX;
         velocityY += accelerationY;
+
+        // Apply air resistance
+        velocityX -= airResistance * velocityX;
+        velocityY -= airResistance * velocityY;
 
         top += velocityY;
         left += velocityX;
