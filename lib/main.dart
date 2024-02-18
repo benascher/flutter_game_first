@@ -24,6 +24,12 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
   final double characterWidth = 50.0;
   final double characterHeight = 50.0;
 
+  // Obstacle position and size
+  final double obstacleTop = 200.0;
+  final double obstacleLeft = 100.0;
+  final double obstacleWidth = 100.0;
+  final double obstacleHeight = 100.0;
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +66,25 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
           top = MediaQuery.of(context).size.height - characterHeight;
           velocityY = -velocityY.abs();
         }
+
+        // Bounce when hitting the obstacle
+        if (left + characterWidth > obstacleLeft && left < obstacleLeft + obstacleWidth &&
+            top + characterHeight > obstacleTop && top < obstacleTop + obstacleHeight) {
+          if (velocityX > 0) {
+            left = obstacleLeft - characterWidth;
+            velocityX = -velocityX.abs();
+          } else if (velocityX < 0) {
+            left = obstacleLeft + obstacleWidth;
+            velocityX = velocityX.abs();
+          }
+          if (velocityY > 0) {
+            top = obstacleTop - characterHeight;
+            velocityY = -velocityY.abs();
+          } else if (velocityY < 0) {
+            top = obstacleTop + obstacleHeight;
+            velocityY = velocityY.abs();
+          }
+        }
       });
     });
     _controller.repeat();
@@ -84,6 +109,11 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
                 });
               },
             ),
+          ),
+          Positioned(
+            top: obstacleTop,
+            left: obstacleLeft,
+            child: Container(width: obstacleWidth, height: obstacleHeight, color: Colors.blue),
           ),
         ],
       ),
