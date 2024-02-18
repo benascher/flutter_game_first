@@ -23,12 +23,14 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
   late AnimationController _controller;
   final double characterWidth = 50.0;
   final double characterHeight = 50.0;
+  final double characterMass = 1.0; // mass of the character
 
   // Obstacle position and size
   final double obstacleTop = 200.0;
   final double obstacleLeft = 100.0;
   final double obstacleWidth = 100.0;
   final double obstacleHeight = 100.0;
+  final double obstacleMass = 10.0; // mass of the obstacle
 
   // Air resistance
   final double airResistance = 0.01;
@@ -77,20 +79,17 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         // Bounce when hitting the obstacle
         if (left + characterWidth > obstacleLeft && left < obstacleLeft + obstacleWidth &&
             top + characterHeight > obstacleTop && top < obstacleTop + obstacleHeight) {
-          if (velocityX > 0) {
-            left = obstacleLeft - characterWidth;
-            velocityX = -velocityX.abs();
-          } else if (velocityX < 0) {
-            left = obstacleLeft + obstacleWidth;
-            velocityX = velocityX.abs();
-          }
-          if (velocityY > 0) {
-            top = obstacleTop - characterHeight;
-            velocityY = -velocityY.abs();
-          } else if (velocityY < 0) {
-            top = obstacleTop + obstacleHeight;
-            velocityY = velocityY.abs();
-          }
+          // Calculate the total momentum before the collision
+          double totalMomentumX = characterMass * velocityX + obstacleMass * 0; // assuming the obstacle is stationary
+          double totalMomentumY = characterMass * velocityY + obstacleMass * 0; // assuming the obstacle is stationary
+
+          // After the collision, the character's velocity is the total momentum divided by the character's mass
+          velocityX = totalMomentumX / characterMass;
+          velocityY = totalMomentumY / characterMass;
+
+          // Reverse the direction of the velocity to simulate a bounce
+          velocityX = -velocityX;
+          velocityY = -velocityY;
         }
       });
     });
