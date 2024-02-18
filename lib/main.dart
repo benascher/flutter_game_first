@@ -55,8 +55,7 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         velocityX -= airResistance * velocityX;
         velocityY -= airResistance * velocityY;
 
-        top += velocityY;
-        left += velocityX;
+        
 
         // Apply friction
         velocityX *= 0.95;
@@ -65,6 +64,9 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         // Stop the character when its speed is very low
         if (velocityX.abs() < 0.1) velocityX = 0;
         if (velocityY.abs() < 0.1) velocityY = 0;
+
+        top += velocityY;
+        left += velocityX;
 
         // Bounce when hitting the edge of the screen
         if (left < 0) {
@@ -97,7 +99,13 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
           velocityX = -velocityX;
           velocityY = -velocityY;
 
-          score++; // Increase the score when the character hits the obstacle
+          top += velocityY;
+          left += velocityX;
+
+          if (velocityX.abs() >= 0.1 || velocityY.abs() >= 0.4) {
+            score++; // Increase the score when the character hits the obstacle
+          }
+          // score++; // Increase the score when the character hits the obstacle
         
           // audioCache.play('short.mp3'); // Play the sound effect
         }
