@@ -23,15 +23,19 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
   late AnimationController _controller;
   final double characterWidth = 50.0;
   final double characterHeight = 50.0;
+  final double characterMass = 1.0; // mass of the character
 
   // Obstacle position and size
   final double obstacleTop = 200.0;
   final double obstacleLeft = 100.0;
   final double obstacleWidth = 100.0;
   final double obstacleHeight = 100.0;
+  final double obstacleMass = 10000.0; // mass of the obstacle
 
   // Air resistance
   final double airResistance = 0.01;
+
+  int score = 0; // Add a score variable
 
   @override
   void initState() {
@@ -69,28 +73,27 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
         if (top < 0) {
           top = 0;
           velocityY = velocityY.abs();
-        } else if (top + characterHeight > MediaQuery.of(context).size.height) {
-          top = MediaQuery.of(context).size.height - characterHeight;
+        } else if (top + characterHeight > MediaQuery.of(context).size.height-50) {
+          top = MediaQuery.of(context).size.height - characterHeight -50;
           velocityY = -velocityY.abs();
         }
 
         // Bounce when hitting the obstacle
         if (left + characterWidth > obstacleLeft && left < obstacleLeft + obstacleWidth &&
             top + characterHeight > obstacleTop && top < obstacleTop + obstacleHeight) {
-          if (velocityX > 0) {
-            left = obstacleLeft - characterWidth;
-            velocityX = -velocityX.abs();
-          } else if (velocityX < 0) {
-            left = obstacleLeft + obstacleWidth;
-            velocityX = velocityX.abs();
-          }
-          if (velocityY > 0) {
-            top = obstacleTop - characterHeight;
-            velocityY = -velocityY.abs();
-          } else if (velocityY < 0) {
-            top = obstacleTop + obstacleHeight;
-            velocityY = velocityY.abs();
-          }
+          // Calculate the total momentum before the collision
+          double totalMomentumX = characterMass * velocityX + obstacleMass * 0; // assuming the obstacle is stationary
+          double totalMomentumY = characterMass * velocityY + obstacleMass * 0; // assuming the obstacle is stationary
+
+          // After the collision, the character's velocity is the total momentum divided by the character's mass
+          velocityX = totalMomentumX / characterMass;
+          velocityY = totalMomentumY / characterMass;
+
+          // Reverse the direction of the velocity to simulate a bounce
+          velocityX = -velocityX;
+          velocityY = -velocityY;
+
+          score++; // Increase the score when the character hits the obstacle
         }
       });
     });
@@ -121,6 +124,11 @@ class _DraggableCharacterState extends State<DraggableCharacter> with SingleTick
             top: obstacleTop,
             left: obstacleLeft,
             child: Container(width: obstacleWidth, height: obstacleHeight, color: Colors.blue),
+          ),
+          Positioned( // Add a Text widget to display the score
+            top: 20,
+            right: 20,
+            child: Text('Score: $score', style: TextStyle(fontSize: 24)),
           ),
         ],
       ),
